@@ -1,3 +1,4 @@
+# Import necessary modules and libraries
 import os
 import random
 import discord
@@ -6,27 +7,25 @@ import asyncpraw
 import async_timeout
 import aiohttp
 
-
+# Set up Discord bot with necessary credentials and intents
 intents = discord.Intents.all()
-
-
 bot = commands.Bot(command_prefix='$', intents=intents)
-ownerid = []
-botowner = 'ThiccDaddy'
-bot.remove_command('help')
+ownerid = [] # not currently used
+botowner = 'ThiccDaddy' # not currently used
+bot.remove_command('help') # removes the default help command
 
+# Create a Reddit instance with the asyncpraw library
+reddit = asyncpraw.Reddit(
+    client_id='',
+    client_secret='',
+    username='',
+    password='fakepass',
+    user_agent='ow_bot'
+)
 
-reddit = asyncpraw.Reddit(client_id='',
-                          client_secret='',
-                          username='',
-                          password='fakepass',
-                          user_agent='ow_bot'
-                          )
+all_subs = [] # empty list to hold generated memes
 
-
-all_subs = []
-
-
+# Asynchronous function to generate memes from the "memes" subreddit and add them to "all_subs" list
 async def gen_memes(client_id, client_secret, username, password, user_agent):
     async with aiohttp.ClientSession() as session:
         reddit = asyncpraw.Reddit(
@@ -49,15 +48,13 @@ async def gen_memes(client_id, client_secret, username, password, user_agent):
             await asyncio.sleep(5)
             await gen_memes(client_id, client_secret, username, password, user_agent)
 
-
-
-
+# Event for when the bot is ready
 @bot.event
 async def on_ready():
     print('Fired up & ready!')
     await gen_memes()
 
-
+# Command to display a random meme from the "all_subs" list as an embed in the chat
 @bot.command(aliases=['memes'])
 async def meme(ctx):
     if not all_subs:
@@ -79,12 +76,12 @@ async def meme(ctx):
                      icon_url='https://www.vectorico.com/download/social_media/Reddit-Icon.png')
     await ctx.send(embed=embed)
 
-
+# Command to refresh the "all_subs" list by calling the "gen_memes" function
 @bot.command(name='reload-meme')
 async def reload_meme(ctx):
     msg = await ctx.send('Reloading memes ...')
     await gen_memes()
     await msg.edit(content='Great success! ✅')
 
-
+# Run the bot with the provided token
 bot.run('discord token here')
